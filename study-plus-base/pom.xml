@@ -7,7 +7,6 @@
     <groupId>com.kevintam</groupId>
     <artifactId>study-plus-base</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
     <!--   构建父子工程-->
     <parent>
         <artifactId>study-plus-parent</artifactId>
