@@ -1,15 +1,9 @@
 package com.kevintam.entity;
 
-        import com.baomidou.mybatisplus.annotation.IdType;
-        import com.baomidou.mybatisplus.annotation.TableId;
-        import com.baomidou.mybatisplus.annotation.TableName;
-        import lombok.AllArgsConstructor;
-        import lombok.Data;
-        import lombok.NoArgsConstructor;
-
-        import java.io.Serializable;
-        import java.time.LocalDateTime;
-
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 /**
  * @author kevintam
  * @version 1.0
@@ -22,7 +16,7 @@ package com.kevintam.entity;
 @TableName("course_base")
 public class CourseBase implements Serializable {
 
-    @TableId(value = "id",type = IdType.AUTO)
+    @TableId(value = "id", type = IdType.AUTO)
     private Long id;//主键
     private Long companyId;//教师id
     private String companyName;//教师名称
@@ -35,10 +29,12 @@ public class CourseBase implements Serializable {
     private String teachmode;//教育模式
     private String description;//课程的介绍
     private String pic;//图片
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createDate;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime changeDate;
     private String createPeople;//创建的人
     private String changePeople;//修改的人
-    private Integer auditStatus;//审核状态
-    private Integer status;//课程发布状态
+    private String auditStatus;//审核状态
+    private String status;//课程发布状态
 }
