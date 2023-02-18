@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 
 /**
  * 封装查询到信息进行返回
+ * vo视图展示
  */
 @Data
 public class CourseSearchResultVo {
