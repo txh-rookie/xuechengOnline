@@ -24,6 +24,9 @@ public class PageResult<T> implements Serializable {
     private long page;
     //每页记录数
     private long pageSize;
+//    public PageResult(List<T> items){
+//        this.items=items;
+//    }
     public PageResult(List<T> items, long counts, long page, long pageSize) {
         this.items = items;
         this.counts = counts;

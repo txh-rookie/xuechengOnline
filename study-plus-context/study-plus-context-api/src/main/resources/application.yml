@@ -5,6 +5,12 @@ server:
 spring:
   application:
     name: content-api
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        group: study-plus-project
+        namespace: dev
 logging:
   config: classpath:log4j2-dev.xml
 swagger:

@@ -3,7 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.kevintam.content.mapper.CourseBaseMapper">
-<!--    模拟sql语句-->
+    <!--    模拟sql语句-->
     <select id="listCourse" resultType="com.kevintam.entity.CourseBase">
         select * from coursebase
         <where>
@@ -11,8 +11,12 @@
                 name like #{name},
             </if>
             <if test="status!=null">
-                status=#{status}
+                status=#{status},
+            </if>
+            <if test="auditStatus!=null">
+                auditStatus#{xxxxx}
             </if>
         </where>
+        limit #{pageNo},#{pageSize}
     </select>
 </mapper>
