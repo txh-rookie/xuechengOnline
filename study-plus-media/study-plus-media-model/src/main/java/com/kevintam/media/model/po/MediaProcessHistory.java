@@ -59,5 +59,6 @@ public class MediaProcessHistory implements Serializable {
      */
     private String url;
 
+    private String errorMsg;
 
 }

@@ -1,7 +1,9 @@
 package com.kevintam.content.services;
 
 import com.kevintam.dto.AddTeachplanDTO;
+import com.kevintam.dto.BindTeachplanMediaDto;
 import com.kevintam.dto.TeachplanDTO;
+import com.kevintam.entity.TeachplanMedia;
 
 import java.util.List;
 
@@ -14,4 +16,6 @@ public interface TeachplanService {
     void deleteTeachplan(String id);
 
     void moveUp(String id);
+
+    TeachplanMedia teachplanMedia(BindTeachplanMediaDto bindTeachplanMediaDto);
 }

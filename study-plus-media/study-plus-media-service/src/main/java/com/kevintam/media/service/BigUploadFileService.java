@@ -12,4 +12,5 @@ public interface BigUploadFileService {
 
 //     mergeChunks(String fileMd5, String fileNRestResponseame, int chunkTotal);
     RestResponse mergeChunks(Long companyId, String fileMd5, int chunkTotal, UploadFileParamsDto uploadFileParamsDto);
+    public void uploadBigFiles(String filePath, String bucketName, String fileName);
 }

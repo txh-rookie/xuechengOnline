@@ -222,7 +222,7 @@ public class BigUploadFileServiceImpl implements BigUploadFileService {
         return RestResponse.success(true);
     }
 
-    private void uploadBigFiles(String filePath, String bucketName, String fileName) {
+    public void uploadBigFiles(String filePath, String bucketName, String fileName) {
         try {
             UploadObjectArgs build = UploadObjectArgs.builder().bucket(bucketName).filename(filePath).object(fileName).build();
             minioClient.uploadObject(build);

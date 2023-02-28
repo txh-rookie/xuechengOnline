@@ -2,6 +2,7 @@ package com.kevintam.content.api;
 
 import com.kevintam.content.services.TeachplanService;
 import com.kevintam.dto.AddTeachplanDTO;
+import com.kevintam.dto.BindTeachplanMediaDto;
 import com.kevintam.dto.TeachplanDTO;
 import com.kevintam.entity.Teachplan;
 import io.swagger.annotations.Api;
@@ -49,5 +50,12 @@ public class TeachplanController {
     @PostMapping("/teachplan/moveup/{id}")
     public void moveUpTeachplan(@PathVariable("id") String id){
         teachplanService.moveUp(id);
+    }
+
+//    http://localhost:8601/api/content/teachplan/association/media
+    @ApiOperation("绑定我们的课程于视频的接口")
+    @PostMapping("/teachplan/association/media")
+    public void teachplanMedia(@RequestBody BindTeachplanMediaDto bindTeachplanMediaDto){
+       teachplanService.teachplanMedia(bindTeachplanMediaDto);
     }
 }

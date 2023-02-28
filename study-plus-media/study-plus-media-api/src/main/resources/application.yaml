@@ -39,3 +39,20 @@ minio:
   bucket:
     files: mediafile
     video: video
+xxl:
+  job:
+    admin:
+      addresses: http://localhost:8080/xxl-job-admin
+    executor:
+      appname: media-process-service
+      address:
+      ip:
+      port: 8888
+      logpath: /Users/kevintam/xxl-job/jobhandler/
+      logretentiondays: 30
+    accessToken: default_token
+
+#    定义线程池
+ThreadPool:
+  corePoolSize: 8
+  maxCorePoolSize: 16

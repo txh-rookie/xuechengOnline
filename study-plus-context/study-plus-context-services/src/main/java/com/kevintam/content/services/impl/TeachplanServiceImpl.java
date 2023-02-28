@@ -1,11 +1,13 @@
 package com.kevintam.content.services.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kevintam.content.mapper.TeachplanMapper;
 import com.kevintam.content.mapper.TeachplanMediaMapper;
 import com.kevintam.content.services.TeachplanService;
 import com.kevintam.dto.AddTeachplanDTO;
+import com.kevintam.dto.BindTeachplanMediaDto;
 import com.kevintam.dto.TeachplanDTO;
 import com.kevintam.entity.Teachplan;
 import com.kevintam.entity.TeachplanMedia;
@@ -108,6 +110,35 @@ public class TeachplanServiceImpl extends ServiceImpl<TeachplanMapper, Teachplan
        //判断一下移动的是二级节点还是一级节点
         moveOneLevel(teachplan);
     }
+    /**
+     * 实现我们课程接口与我们的视频进行绑定
+     */
+    @Override
+    public TeachplanMedia teachplanMedia(BindTeachplanMediaDto bindTeachplanMediaDto) {
+        //1、去判断一下，只能我们的二级课程才可以绑定视频
+        Long teachplanId = bindTeachplanMediaDto.getTeachplanId();
+        Teachplan teachplan = teachplanMapper.selectById(teachplanId);
+        Integer grade = teachplan.getGrade();
+        if(teachplan==null){
+            StudyException.cast("教学计划不存在....");
+        }
+        if(grade!=2){
+            StudyException.cast("只能二级课程才可以绑定视频");
+        }
+        Long courseId = teachplan.getCourseId();
+        //先删除原来该教学计划绑定的媒资
+        teachplanMediaMapper.delete(new LambdaQueryWrapper<TeachplanMedia>().eq(TeachplanMedia::getTeachplanId,teachplanId));
+        //再添加教学计划与媒资的绑定关系
+        TeachplanMedia teachplanMedia = new TeachplanMedia();
+        teachplanMedia.setCourseId(courseId);
+        teachplanMedia.setTeachplanId(teachplanId);
+        teachplanMedia.setMediaFilename(bindTeachplanMediaDto.getFileName());
+        teachplanMedia.setMediaId(bindTeachplanMediaDto.getMediaId());
+        teachplanMedia.setCreateDate(LocalDateTime.now());
+        teachplanMediaMapper.insert(teachplanMedia);
+        return teachplanMedia;
+    }
+
     //将二级移动一级
     private void moveOneLevel(Teachplan teachplan) {
 

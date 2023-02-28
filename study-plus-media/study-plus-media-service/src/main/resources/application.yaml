@@ -23,3 +23,6 @@ minio:
   bucket:
     files: mediafile
     video: video
+
+
+

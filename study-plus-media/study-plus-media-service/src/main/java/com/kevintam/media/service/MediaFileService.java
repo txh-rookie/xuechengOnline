@@ -11,6 +11,7 @@ import io.minio.errors.ServerException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MediaFileService {
+
     PageResult<MediaFiles> queryMediaFiles(Long companyId, PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto);
 
     /**

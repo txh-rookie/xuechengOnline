@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.kevintam.media.Utils.GetDateTool;
 import com.kevintam.media.mapper.MediaFilesMapper;
+import com.kevintam.media.mapper.MediaFilesProcessMapper;
 import com.kevintam.media.model.dto.MediaFileDTO;
 import com.kevintam.media.model.dto.QueryMediaParamsDto;
 import com.kevintam.media.model.dto.UploadFileParamsDto;
 import com.kevintam.media.model.po.MediaFiles;
+import com.kevintam.media.model.po.MediaProcess;
 import com.kevintam.media.service.MediaFileService;
 import com.kevintam.study.entity.PageParams;
 import com.kevintam.study.entity.PageResult;
@@ -16,11 +18,8 @@ import com.kevintam.study.entity.RestResponse;
 import com.kevintam.study.exception.StudyException;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
-import io.minio.errors.*;
-import io.minio.messages.Upload;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.http.nio.util.ByteBufferAllocator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,12 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.print.attribute.standard.Media;
 import java.io.ByteArrayInputStream;
 
-import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Date;
 
@@ -58,6 +53,9 @@ public class MediaFilesServiceImpl extends ServiceImpl<MediaFilesMapper, MediaFi
     @Autowired
     private MediaFileService mediaFileService;
 
+    @Autowired
+    private MediaFilesProcessMapper mediaFilesProcessMapper;
+
     @Value("${minio.bucket.files}")
     private String filesBucket;
     @Value("${minio.bucket.video}")
@@ -66,16 +64,16 @@ public class MediaFilesServiceImpl extends ServiceImpl<MediaFilesMapper, MediaFi
     @Override
     public PageResult<MediaFiles> queryMediaFiles(Long companyId, PageParams pageParams, QueryMediaParamsDto queryMediaParamsDto) {
         LambdaQueryWrapper<MediaFiles> queryWrapper = new LambdaQueryWrapper<>();
-             //文件名 filename like "%#{filename}%" 查询
-        queryWrapper.like(StringUtils.isNoneEmpty(queryMediaParamsDto.getFilename()),MediaFiles::getFilename,queryMediaParamsDto.getFilename());
+        //文件名 filename like "%#{filename}%" 查询
+        queryWrapper.like(StringUtils.isNoneEmpty(queryMediaParamsDto.getFilename()), MediaFiles::getFilename, queryMediaParamsDto.getFilename());
         queryWrapper.eq(StringUtils.isNoneEmpty(queryMediaParamsDto.getAuditStatus()),
                 MediaFiles::getAuditStatus, queryMediaParamsDto.getAuditStatus());
 
         queryWrapper.eq(StringUtils.isNoneEmpty(queryMediaParamsDto.getFileType()),
                 MediaFiles::getFileType, queryMediaParamsDto.getFileType());
-        Page<MediaFiles> page = new Page<>(pageParams.getPageNo(),pageParams.getPageSize());
+        Page<MediaFiles> page = new Page<>(pageParams.getPageNo(), pageParams.getPageSize());
         Page<MediaFiles> mediaFilesPage = mediaFilesMapper.selectPage(page, queryWrapper);
-        PageResult<MediaFiles> result = new PageResult<>(mediaFilesPage.getRecords(),mediaFilesPage.getTotal(),mediaFilesPage.getCurrent(),mediaFilesPage.getSize());
+        PageResult<MediaFiles> result = new PageResult<>(mediaFilesPage.getRecords(), mediaFilesPage.getTotal(), mediaFilesPage.getCurrent(), mediaFilesPage.getSize());
         return result;
     }
 
@@ -118,17 +116,18 @@ public class MediaFilesServiceImpl extends ServiceImpl<MediaFilesMapper, MediaFi
             uploadMinio(bytes, objectName, filesBucket, uploadFileParamsDto.getContentType());
 
             //取用这个id去查一下我们数据库中是否存在值
-            MediaFiles mediaFiles = mediaFileService.getMediaFileDTO(companyId, uploadFileParamsDto, md5_file_id, objectName,filesBucket);
+            MediaFiles mediaFiles = mediaFileService.getMediaFileDTO(companyId, uploadFileParamsDto, md5_file_id, objectName, filesBucket);
             MediaFileDTO mediaFileDTO = new MediaFileDTO();
             BeanUtils.copyProperties(mediaFiles, mediaFileDTO);
             return mediaFileDTO;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("文件上传失败:{}", e);
             throw new RuntimeException(e.getMessage());
         }
     }
+
     //文件上传的方法
-    public void uploadMinio(byte[] bytes, String objectName, String filesBucket, String contentType) throws Exception{
+    public void uploadMinio(byte[] bytes, String objectName, String filesBucket, String contentType) throws Exception {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         //minio上传文件
         PutObjectArgs build = PutObjectArgs.builder()
@@ -144,28 +143,36 @@ public class MediaFilesServiceImpl extends ServiceImpl<MediaFilesMapper, MediaFi
                 .contentType(contentType)
                 .build();
 
-            minioClient.putObject(build);
+        minioClient.putObject(build);
     }
 
     @Override
     public RestResponse<String> preview(String id) {
-        if(!StringUtils.isNotEmpty(id)){
+        if (!StringUtils.isNotEmpty(id)) {
             StudyException.cast("预览功能必须上传文件的id");
         }
         MediaFiles mediaFiles = mediaFilesMapper.selectById(id);
-        if(mediaFiles==null){
+        if (mediaFiles == null) {
             StudyException.cast("文件id错误...");
         }
         String url = mediaFiles.getUrl();
+        //处理一下url，如果是mp4、png、mp3等都可以生成url返回给前端
         RestResponse<String> stringRestResponse = new RestResponse<>();
-        stringRestResponse.setResult(url);
-        stringRestResponse.setCode(0);
+        if (url.indexOf("mp4") >= 0 ||
+                url.indexOf("png") >= 0 ||
+                url.indexOf("mp3") >= 0 || url.indexOf("jpg") >= 0) {
+            stringRestResponse.setResult(url);
+            stringRestResponse.setCode(0);
+        } else {
+            stringRestResponse.setCode(-1);
+            stringRestResponse.setResult(null);
+        }
         return stringRestResponse;
     }
 
     //将mediaFileDTO进行封装,上传到数据库
     @Transactional
-    public MediaFiles getMediaFileDTO(Long companyId, UploadFileParamsDto uploadFileParamsDto, String md5_file_id, String objectName,String bucketName) {
+    public MediaFiles getMediaFileDTO(Long companyId, UploadFileParamsDto uploadFileParamsDto, String md5_file_id, String objectName, String bucketName) {
         MediaFiles mediaFiles = this.getById(md5_file_id);
         //数据库中没有查询到的
         if (mediaFiles == null) {
@@ -181,6 +188,18 @@ public class MediaFilesServiceImpl extends ServiceImpl<MediaFilesMapper, MediaFi
             mediaFiles.setFilePath(objectName);
             mediaFiles.setCreateDate(LocalDateTime.now());
             mediaFiles.setStatus("1");
+            //将avi的视频上传到待处理的表中
+            if (objectName.lastIndexOf(".avi") >= 0) {
+                MediaProcess mediaProcess = new MediaProcess();
+                mediaProcess.setFileId(md5_file_id);
+                mediaProcess.setFilename(uploadFileParamsDto.getFilename());
+                mediaProcess.setBucket(bucketName);
+                mediaProcess.setFilePath(objectName);
+                mediaProcess.setStatus("1");
+                mediaProcess.setCreateDate(LocalDateTime.now());
+                mediaProcess.setUrl("/" + bucketName + "/" + objectName);
+                mediaFilesProcessMapper.insert(mediaProcess);
+            }
             boolean insert = this.save(mediaFiles);
             if (!insert) {
                 StudyException.cast("保存文件信息失败");
