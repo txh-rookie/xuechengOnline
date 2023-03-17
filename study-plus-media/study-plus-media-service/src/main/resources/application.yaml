@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: media-service
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/study_plus_media?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    username: root
+    password: kevintam
+  profiles:
+    active: dev
+logging:
+  config: classpath:log4j2-dev.xml
+  level:
+    com.alibaba.nacos.client.naming: warn
+    com.alibaba.nacos.client.config.impl: warn
+mybatis-plus:
+  mapper-locations: classpath*:/com/kevintam/content/mapper/*.xml
+
+minio:
+  endpoint: http://localhost:9000
+  accessKey: admin
+  secretKey: kevintam
+  bucket:
+    files: mediafile
+    video: video
+
+
+

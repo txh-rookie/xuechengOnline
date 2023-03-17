@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kevintam.content.mapper.TeachplanMapper">
+
+    <resultMap id="customTeachplanTreeMap" type="com.kevintam.dto.TeachplanDTO">
+        <id property="id" column="one_id"></id>
+        <result property="pname" column="one_name"></result>
+        <result property="courseId" column="one_course_id"></result>
+        <result property="changeDate" column="one_change_date"></result>
+        <result property="createDate" column="one_change_date"></result>
+        <result property="endTime" column="one_end_time"></result>
+        <result property="grade" column="one_grade"></result>
+        <result property="isPreview" column="one_preview"></result>
+        <result property="mediaType" column="one_media_type"></result>
+        <result property="orderby" column="one_orderby"></result>
+        <result property="parentid" column="one_parentid"></result>
+        <result property="startTime" column="one_start_time"></result>
+        <!--      封装一下二级-->
+        <collection property="teachPlanTreeNodes" ofType="com.kevintam.dto.TeachplanDTO">
+            <id property="id" column="two_id"></id>
+            <result property="pname" column="two_pname"></result>
+            <result property="parentid" column="two_parentid"></result>
+            <result property="grade" column="two_grade"></result>
+            <result property="mediaType" column="two_media_type"></result>
+            <result property="startTime" column="two_strat_time"></result>
+            <result property="endTime" column="two_end_time"></result>
+            <result property="orderby" column="two_orderby"></result>
+            <result property="courseId" column="two_course_id"></result>
+            <result property="coursePubId" column="two_course_pub_id"></result>
+            <!--         封装一下二级里面子集-->
+            <association property="teachplanMedia" javaType="com.kevintam.entity.TeachplanMedia">
+                <result column="teachplanMeidaId" property="id"/>
+                <result column="media_fileName" property="mediaFilename"/>
+                <result column="media_id" property="mediaId"/>
+                <result column="two_id" property="teachplanId"/>
+                <result column="two_course_id" property="courseId"/>
+                <result column="two_course_pub_id" property="coursePubId"/>
+            </association>
+        </collection>
+    </resultMap>
+    <select id="selectTreeNodes" resultMap="customTeachplanTreeMap">
+        select
+            one.id one_id,
+            one.pname one_name,
+            one.course_id one_course_id,
+            one.change_date one_change_date,
+            one.course_pub_id one_course_pub_id,
+            one.create_date one_create_date,
+            one.end_time one_end_time,
+            one.grade one_grade,
+            one.is_preview one_preview,
+            one.media_type one_media_type,
+            one.orderby one_orderby,
+            one.parentid one_parentid,
+            one.start_time one_start_time,
+            two.id two_id,
+            two.pname two_pname,
+            two.parentid two_parentid,
+            two.grade two_grade,
+            two.media_type two_media_type,
+            two.start_time two_strat_time,
+            two.end_time  two_end_time,
+            two.orderby two_orderby,
+            two.course_id two_course_id,
+            two.course_pub_id two_course_pub_id,
+            tm.media_fileName media_fileName,
+            tm.id teachplanMeidaId,
+            tm.media_id media_id
+        from teachplan one
+                 left join teachplan two on  one.id=two.parentid
+                 left join teachplan_media tm on two.id=tm.teachplan_id
+        where one.course_id=#{courseId} and one.status=1 and one.grade=1
+        order by one.orderby,two.orderby
+    </select>
+
+    <select id="getNewOrderBy" resultType="integer">
+        SELECT count(orderby) FROM teachplan
+        <where>
+            <if test="parentid!=null">
+                parentid=#{parentid}
+            </if>
+            <if test="courseId!=null"></if>
+            and course_id=#{courseId}
+        </where>
+    </select>
+</mapper>

@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: system-service
+#  profiles:
+#    active: dev
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/study-system?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    username: root
+    password: kevintam
+# 日志文件配置路径
+logging:
+  config: classpath:log4j2-dev.xml
+  level:
+    com.alibaba.nacos.client.naming: warn
+    com.alibaba.nacos.client.config.impl: warn

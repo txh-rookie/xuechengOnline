@@ -8,6 +8,15 @@
     <artifactId>study-plus-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+<!--    将所有的项目聚合起来-->
+    <modules>
+        <module>../study-plus-auth</module>
+        <module>../study-plus-base</module>
+        <module>../study-plus-checkcode</module>
+        <module>../study-plus-context</module>
+        <module>../study-plus-gateway</module>
+        <module>../study-plus-media</module>
+    </modules>
 
     <properties>
         <java.version>1.8</java.version>

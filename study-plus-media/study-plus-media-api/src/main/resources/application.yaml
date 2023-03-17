@@ -1,0 +1,58 @@
+#微服务配置
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/study_plus_media?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    username: root
+    password: kevintam
+  application:
+    name: media-api
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        namespace: ${spring.profiles.active}
+        group: study-plus-project
+  profiles:
+    active: dev
+
+logging:
+  config: classpath:log4j2-dev.xml
+  level:
+    com.alibaba.nacos.client.naming: warn
+    com.alibaba.nacos.client.config.impl: warn
+server:
+  servlet:
+    context-path: /media
+  port: 63050
+swagger:
+  title: "学习媒资管理接口"
+  description: "学习媒资管理接口"
+  base-package: com.kevintam.media
+  enabled: true
+  version: 1.0.0
+
+minio:
+  endpoint: http://localhost:9000
+  accessKey: admin
+  secretKey: kevintam
+  bucket:
+    files: mediafile
+    video: video
+xxl:
+  job:
+    admin:
+      addresses: http://localhost:8080/xxl-job-admin
+    executor:
+      appname: media-process-service
+      address:
+      ip:
+      port: 8888
+      logpath: /Users/kevintam/xxl-job/jobhandler/
+      logretentiondays: 30
+    accessToken: default_token
+
+#    定义线程池
+ThreadPool:
+  corePoolSize: 8
+  maxCorePoolSize: 16
