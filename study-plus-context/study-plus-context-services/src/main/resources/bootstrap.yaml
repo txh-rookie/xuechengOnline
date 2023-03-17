@@ -1,11 +1,11 @@
 spring:
   application:
     name: content-service
-#  datasource:
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#    url: jdbc:mysql://localhost:3306/study-plus?serverTimezone=UTC&userUnicode=true&useSSL=false&
-#    username: root
-#    password: kevintam
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/study-plus?serverTimezone=UTC&userUnicode=true&useSSL=false&
+    username: root
+    password: kevintam
     # 日志文件配置路径
   cloud:
     nacos:
@@ -23,9 +23,17 @@ spring:
             group: study-plus-project
             refresh: true
   #        扩展的方式加进来
-
   profiles:
     active: dev
+  rabbitmq:
+    host: localhost
+    username: admin
+    password: kevintam
+    port: 5672
+#    开启手动应答
+    listener:
+      simple:
+        acknowledge-mode: manual
 logging:
   config: classpath:log4j2-dev.xml
   level:

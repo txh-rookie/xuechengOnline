@@ -22,4 +22,11 @@ public interface CourseBaseService {
     CourseBaseInfoDto getCourseIdByCourseInfoDTO(Long courseId);
 
     CourseBaseInfoDto updateCourseInfoDTO(Long companyId,UpdateCourseDTO updateCourseDto);
+
+    /**
+     * 根据我们的课程id，去封装课程信息
+     * @param courseId
+     * @return
+     */
+    public CourseBaseInfoDto getCourseBaseInfo(Long courseId);
 }

@@ -2,6 +2,7 @@ package com.kevintam.content.api;
 
 import com.kevintam.content.services.CourseBaseService;
 import com.kevintam.content.services.CourseCategoryService;
+import com.kevintam.content.utils.SecurityUtils;
 import com.kevintam.dto.*;
 import com.kevintam.entity.CourseBase;
 import com.kevintam.entity.CourseCategory;
@@ -12,6 +13,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +40,7 @@ public class CourseBaseInfoController {
 
     @ApiOperation("课程查询接口")
     @PostMapping("/course/list")
+    @PreAuthorize("hasAuthority('xc_teachmanager_course_list')")
     public PageResult<CourseBase> listCourseBase(PageParams pageParams, @RequestBody SearchCourseNameDTO params) {
         return courseBaseService.listCourse(pageParams, params);
     }
@@ -66,7 +70,9 @@ public class CourseBaseInfoController {
     @ApiOperation("根据课程id查询课程信息")
     @GetMapping("/course/{courseId}")
     public CourseBaseInfoDto getCourseIdByCourseInfoDTO(@PathVariable("courseId") Long courseId){
-         return courseBaseService.getCourseIdByCourseInfoDTO(courseId);
+        SecurityUtils.XcUser user = SecurityUtils.getUser();
+        System.out.println(user);
+        return courseBaseService.getCourseIdByCourseInfoDTO(courseId);
     }
 
     @ApiOperation("更新课程信息的接口")
@@ -75,4 +81,5 @@ public class CourseBaseInfoController {
         Long companyId=22L;
         return courseBaseService.updateCourseInfoDTO(companyId,updateCourseDTO);
     }
+
 }
